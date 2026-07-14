@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>mBlock Kids</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <!-- Favicon inline (evita error 404) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231565C0'/><circle cx='12' cy='14' r='3' fill='white'/><circle cx='20' cy='14' r='3' fill='white'/><path d='M10 21 Q16 26 22 21' stroke='white' stroke-width='2' fill='none'/></svg>" />
+  <!-- Phaser 3 -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+
+  <!-- Blockly v10 (versión fija para evitar breaking changes) -->
+  <script src="https://unpkg.com/blockly@10.4.3/blockly_compressed.js"></script>
+  <script src="https://unpkg.com/blockly@10.4.3/blocks_compressed.js"></script>
+  <!-- Generador JS de Blockly v10 — expone window.javascript -->
+  <script src="https://unpkg.com/blockly@10.4.3/javascript_compressed.js"></script>
+</head>
+<body>
+
+  <!-- PANTALLA DE INICIO -->
+  <div id="start-screen" class="screen active">
+    <div class="start-bg">
+      <div class="sun"></div>
+      <div class="cloud cloud1"></div>
+      <div class="cloud cloud2"></div>
+      <div class="cloud cloud3"></div>
+      <div class="mountain mountain1"></div>
+      <div class="mountain mountain2"></div>
+      <div class="grass-strip"></div>
+    </div>
+    <div class="logo-container">
+      <div class="logo-robot">
+        <div class="robot-head">
+          <div class="robot-eye left"></div>
+          <div class="robot-eye right"></div>
+          <div class="robot-mouth"></div>
+          <div class="robot-antenna"></div>
+        </div>
+        <div class="robot-body">
+          <div class="robot-heart"></div>
+        </div>
+        <div class="robot-legs">
+          <div class="robot-leg"></div>
+          <div class="robot-leg"></div>
+        </div>
+      </div>
+    </div>
+    <div class="level-selector">
+      <div class="level-card" data-level="1" onclick="selectLevel(1)">
+        <div class="level-icon lv1"><span class="lv-emoji">🚀</span></div>
+        <div class="level-stars">
+          <span class="star-icon" id="star-1-1">☆</span>
+          <span class="star-icon" id="star-1-2">☆</span>
+          <span class="star-icon" id="star-1-3">☆</span>
+        </div>
+        <div class="level-badge">1</div>
+      </div>
+      <div class="level-card locked" id="lv-card-2" data-level="2" onclick="selectLevel(2)">
+        <div class="level-icon lv2"><span class="lv-emoji">🌟</span></div>
+        <div class="level-stars">
+          <span class="star-icon" id="star-2-1">☆</span>
+          <span class="star-icon" id="star-2-2">☆</span>
+          <span class="star-icon" id="star-2-3">☆</span>
+        </div>
+        <div class="level-badge">2</div>
+      </div>
+      <div class="level-card locked" id="lv-card-3" data-level="3" onclick="selectLevel(3)">
+        <div class="level-icon lv3"><span class="lv-emoji">🎯</span></div>
+        <div class="level-stars">
+          <span class="star-icon" id="star-3-1">☆</span>
+          <span class="star-icon" id="star-3-2">☆</span>
+          <span class="star-icon" id="star-3-3">☆</span>
+        </div>
+        <div class="level-badge">3</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANTALLA DE JUEGO -->
+  <div id="game-screen" class="screen">
+    <div id="blockly-panel">
+      <div id="blockly-workspace"></div>
+      <div id="run-btn" onclick="runCode()">
+        <div class="play-triangle"></div>
+      </div>
+      <div id="clear-btn" onclick="clearWorkspace()">
+        <div class="trash-body-icon">🗑️</div>
+      </div>
+      <div id="home-nav-btn" onclick="goHome()">
+        <div class="home-nav-icon">🏠</div>
+      </div>
+    </div>
+    <div id="phaser-panel">
+      <div id="game-container"></div>
+      <div id="success-overlay" class="overlay hidden">
+        <div class="overlay-content">
+          <div class="big-emoji">🏆</div>
+          <div class="overlay-stars">
+            <span class="big-star" id="ws1">⭐</span>
+            <span class="big-star" id="ws2">⭐</span>
+            <span class="big-star" id="ws3">⭐</span>
+          </div>
+          <div class="overlay-btns">
+            <div class="action-btn green" onclick="nextLevel()"><span>▶▶</span></div>
+            <div class="action-btn blue" onclick="retryLevel()"><span>↺</span></div>
+          </div>
+        </div>
+      </div>
+      <div id="fail-overlay" class="overlay hidden">
+        <div class="overlay-content">
+          <div class="big-emoji">😢</div>
+          <div class="overlay-btns">
+            <div class="action-btn orange" onclick="retryLevel()"><span>↺</span></div>
+            <div class="action-btn purple" onclick="goHome()"><span>🏠</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <xml id="toolbox" style="display:none">
+    <block type="move_forward"></block>
+    <block type="move_backward"></block>
+    <block type="turn_left"></block>
+    <block type="turn_right"></block>
+  </xml>
+
+  <script src="js/levels.js"></script>
+  <script src="js/blocks.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/guide.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
